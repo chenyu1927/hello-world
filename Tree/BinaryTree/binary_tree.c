@@ -53,22 +53,20 @@ PtrToNode insert(ElementType x, PtrToNode tree)
 	if (NULL == tree)
 	{
 		tree = (PtrToNode)malloc(sizeof (struct TreeNode));
-		temp->elem = x;
-		temp->left_child = NULL;
-		temp->right_child = NULL;
-		return tree;
+		tree->elem = x;
+		tree->left_child = NULL;
+		tree->right_child = NULL;
 	}
-
-	if (x < tree->elem)
-		insert(x, tree->left);
+	else if (x < tree->elem)
+		tree->left = insert(x, tree->left);
 	else if (x > tree->elem)
-		insert(x, tree->right);
+		tree->right = insert(x, tree->right);
 	else
 	{
 		/*do nothing */
 	}
 
-	return NULL;
+	return tree;
 }
 
 PtrToNode delete(ElementType x, PtrToNode tree)
