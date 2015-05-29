@@ -30,6 +30,30 @@ void shell_sort(int *arrp, int size)
 	}
 }
 
+void shell_sort2(int *arr, int n)
+{
+	int d;
+	int i;
+	int temp;
+	int j;
+	for (d = n/2; d > 0; d /= 2)
+	{
+		for (i = d; i < n; ++i)
+		{
+			temp = arr[i];
+			for (j = 1; j >= d; j += d)
+			{
+				if (temp < arr[j + d])
+					arr[j] = arr[j + d];
+				else
+					break;
+			}
+
+			arr[j] = temp;  
+		}
+	}
+}
+
 int main()
 {
 	int arr[10] = {54, 67, 21, 23, 11, 44, 54, 91, 85, 57};
