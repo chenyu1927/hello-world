@@ -37,7 +37,7 @@ void heap_adjust(int *arr, int i, int n)
 	}
 	arr[i] = last;
 }
-
+//堆是从下标位1处开始的，下面的实现错误了。
 void k_min(int *arr, int k, int n)
 {
 	int i;
@@ -56,6 +56,24 @@ void k_min(int *arr, int k, int n)
 
 	}
 
+}
+//select_k对数组从0处构建最大堆，来进行原地堆构建
+//因为堆一般是从下标1处开始构建的
+void heap_adjust2(int *arr, int i, int length)
+{
+	int child;
+	int temp = arr[i];
+	for (; 2 * i+1 < n; i = child)
+	{
+		child = 2 * i + 1;
+		if (child + 1 < n && arr[child+1] > arr[child])
+			child += 1;
+		if (temp < arr[child])
+			arr[i] = arr[child];
+		else
+			break;
+	}
+	arr[i] = temp; 
 }
 
 int main(void)
