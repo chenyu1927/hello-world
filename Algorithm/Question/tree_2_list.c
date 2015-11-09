@@ -59,6 +59,36 @@ void search_num(pNode root, int key, int *arr, int top)
 	}
 }
 
+// 转换二叉查找树使左子树都大于右子树
+void tree_left_to_right(pNode root)
+{
+  if (root)
+  {
+    pNode temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+
+    tree_left_to_right(root->left);
+    tree_left_to_right(root->right);
+  }
+}
+//迭代版需要用栈来回溯
+void tree_left_to_right2(pNode root)
+{
+  if(root == NULL)
+    return ;
+
+  struct stack buf;
+  buf.push(root);
+  while (!buf.is_empty())
+  {
+    pNode temp = buf.pop();
+    swap(temp->left, temp->right);
+    if (temp->left) buf.push(temp->left);
+    if (temp->right) buf.push(temp->right);
+  }
+}
+
 void print_num(int *arr, int n)
 {
 	int i;
@@ -88,6 +118,7 @@ pNode tree_insert(pNode root, int key)
   }
   return root;
 }
+
 void print_tree(pNode root)
 {
   if (root)
@@ -114,6 +145,12 @@ int main(void)
   int trr[3];
   memset(trr, 0, sizeof (trr));
   search_num(root, 22, trr, 0);
+
+  print_tree(root);
+  printf("\n");
+  tree_left_to_right(root);
+  print_tree(root);
+  printf("\n");
 /*  print_tree(root);
   printf("\n");
   pNode temp;
