@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include"queue.hpp"
 /*输入一个二叉查找树， 将它转换成一个排序好的双向链表。*/
 struct BSTreeNode
 {
@@ -89,6 +90,52 @@ void tree_left_to_right2(pNode root)
   }
 }
 
+//按照层次输出二叉树，每一层从左到右
+void tree_to_queue(pNode root)
+{
+	if (root == NULL)
+		return ;
+
+	struct queue q;
+	q.push(root);
+	while (!q.is_empty())
+	{
+		pNode  temp = q.pop();
+		print(temp);
+
+		if (temp->left)	q.push(temp->left);
+		if (temp->right) q.push(temp->right);
+
+	}
+}
+//非递归版的中序遍历
+void mid_tree_print(pNode root)
+{
+	if (root == NULL)
+		return ;
+	struct stack buf;
+	pNode temp;
+	buf.push(root);
+	while (!buf.is_empty)
+	{
+		temp = buf.pop();
+		while (temp != NULL)
+		{
+			if (temp->right) buf.push(temp->right);
+			buf.push(temp);
+			if (temp->left) buf.push(temp->left);
+			temp = temp->left;
+		}
+
+		while (1)
+		{
+			temp = buf.pop();
+			print(temp);
+
+			if (temp->right) break;
+		}
+	}
+}
 void print_num(int *arr, int n)
 {
 	int i;
