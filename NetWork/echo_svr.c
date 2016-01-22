@@ -89,7 +89,7 @@ int main(void)
     if ((child = fork()) == 0)
     {
       close(listen_fd);
-      str_echo_1(conn_fd);
+      str_echo(conn_fd);
       exit(-1);
     }
 

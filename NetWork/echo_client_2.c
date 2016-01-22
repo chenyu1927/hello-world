@@ -4,6 +4,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<stdio.h>
+#include<sys/select.h>
 
 void str_cli(FILE *fp, int sockfd)
 {
@@ -22,6 +23,54 @@ void str_cli(FILE *fp, int sockfd)
 	bzero(recvline, 256);
   }
 }
+void str_cli_1(FILE *fp, int sockfd)
+{
+	int max_fd, stdineof, n;
+	fd_set set;
+	char buff[256];
+
+	bzero(buff, 256);
+	FD_ZERO(&set);
+	stdineof = 0;
+	for (; ;)
+	{
+		if (stdineof == 0)
+			FD_SET(fileno(fp), &set);
+		FD_SET(sockfd, &set);
+		max_fd = sockfd > fileno(fp) ? sockfd+1 : fileno(fp)+1;
+		select(max_fd, &set, NULL, NULL, NULL);
+
+		if (FD_ISSET(sockfd, &set))
+		{
+			if ((n = recv(sockfd, buff, 256, 0)) == 0){
+				if (stdineof == 1)
+					return ;
+				else
+				{
+					printf("server err termi\n");
+					exit(-1);
+				}
+			}
+			write(fileno(stdout), buff, n);
+
+		}
+
+		if (FD_ISSET(fileno(fp), &set))
+		{
+			if ((n = read(fileno(fp), buff, 256)) == 0)
+			{
+				stdineof = 1;
+				shutdown(sockfd, SHUT_WR);
+				FD_CLR(fileno(fp), &set);
+
+				continue;
+			}
+
+			send(sockfd, buff, n, 0);
+		}
+	}
+
+}
 int main(int argc, char **argv)
 {
   int sockfd;
@@ -33,7 +82,7 @@ int main(int argc, char **argv)
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   connect(sockfd, (struct sockaddr *)&s_addr, sizeof (s_addr));
   
-  str_cli(stdin, sockfd);
+  str_cli_1(stdin, sockfd);
 
   exit(0);
 }
