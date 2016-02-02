@@ -5,6 +5,7 @@
 #include<arpa/inet.h>
 #include<string.h>
 #define MAXLINE 128
+
 int main(int argc, char **argv)
 {
 	int sockfd, n;
