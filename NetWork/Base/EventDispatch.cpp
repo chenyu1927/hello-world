@@ -19,15 +19,12 @@ int EventDispatch::addEvent(socket_t sockfd, uint8_t event)
 	epoll_event events;
 	bzero(&events, sizeof (epoll_event));
 
-	if (event & EVENT_ALL)
-	{
-		events.events |= (EPOLLIN | EPOLLOUT | EPOLLET);
-	}
-	else if (event & EVENT_READ)
+	if (event & EVENT_READ)
 	{
 		events.events |= (EPOLLIN | EPOLLET);
 	}
-	else if (event & EVENT_WRITE)
+
+	if (event & EVENT_WRITE)
 	{
 		events.events |= (EPOLLOUT | EPOLLET);
 	}
@@ -43,5 +40,46 @@ int EventDispatch::addEvent(socket_t sockfd, uint8_t event)
 
 int EventDispatch::removeEvent(socket_t sockfd, uint8_t event)
 {
+	if (::epoll_ctl(efd_, EPOLL_CTL_DEL, sockfd, NULL) < 0)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+void EventDispatch::loop()
+{
+	epoll_event events[1024];
+	int nfd;
+	if (running_)
+		return ;
+
+	running_ = true;
+	while (running_)
+	{
+		nfd = epoll_wait(efd_, events, 1024, -1);
+		for (int i = 0; i < nfd; ++ i)
+		{
+			int ev_fd = events[i].data.fd;
+			BaseSocket *psock = FindBaseSocket(ev_fd);
+
+			if (psock == NULL)
+				continue ;
+
+			if (events[i].events & EPOLLIN)
+				psock->OnRead();
+			if (events[i].events & EPOLLOUT)
+				psock->OnWrite();
+			
+		}
+	}
 
 }
+
+void EventDispatch::quit()
+{
+	running_ = false;
+}
+
+
