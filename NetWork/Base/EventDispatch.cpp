@@ -14,7 +14,7 @@ EventDispatch::EventDispatch()
 	}
 }
 
-int EventDispatch::addEvent(socket_t sockfd, uint8_t event)
+int EventDispatch::AddEvent(socket_t sockfd, uint8_t event)
 {
 	epoll_event events;
 	bzero(&events, sizeof (epoll_event));
@@ -38,7 +38,7 @@ int EventDispatch::addEvent(socket_t sockfd, uint8_t event)
 	return 0;
 }
 
-int EventDispatch::removeEvent(socket_t sockfd, uint8_t event)
+int EventDispatch::RemoveEvent(socket_t sockfd, uint8_t event)
 {
 	if (::epoll_ctl(efd_, EPOLL_CTL_DEL, sockfd, NULL) < 0)
 	{
@@ -50,12 +50,12 @@ int EventDispatch::removeEvent(socket_t sockfd, uint8_t event)
 
 void EventDispatch::loop()
 {
-	epoll_event events[1024];
-	int nfd;
 	if (running_)
 		return ;
 
 	running_ = true;
+	epoll_event events[1024];
+	int nfd;
 	while (running_)
 	{
 		nfd = epoll_wait(efd_, events, 1024, -1);
