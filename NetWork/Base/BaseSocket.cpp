@@ -18,13 +18,15 @@ void RemoveBaseSocket(BaseSocket *pSock)
 
 BaseSocket *FindBaseSocket(SOCKET fd)
 {
+	BaseSocket *p_socket = NULL;
 	EventMap::iterator iter = g_event_map.find(fd);
 	if (iter != g_event_map.end())
 	{
-		return iter->second;
+		p_socket = iter->second;
+		p_socket->AddRef();
 	}
 
-	return NULL;
+	return p_socket;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
