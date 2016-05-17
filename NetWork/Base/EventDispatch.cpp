@@ -48,7 +48,7 @@ int EventDispatch::RemoveEvent(socket_t sockfd, uint8_t event)
 	return 0;
 }
 
-void EventDispatch::loop()
+void EventDispatch::Loop()
 {
 	if (running_)
 		return ;
@@ -77,7 +77,7 @@ void EventDispatch::loop()
 
 }
 
-void EventDispatch::quit()
+void EventDispatch::Quit()
 {
 	running_ = false;
 }

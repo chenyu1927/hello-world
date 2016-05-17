@@ -16,11 +16,11 @@ public:
 	~EventDispatch();
 
 public:
-	int addEvent(socket_t sockfd, uint8_t event);
-	int removeEvent(socket_t sockfd, uint8_t event);
+	int AddEvent(socket_t sockfd, uint8_t event);
+	int RemoveEvent(socket_t sockfd, uint8_t event);
 
-	void loop();
-	void quit();
+	void Loop();
+	void Quit();
 
 private:
 
