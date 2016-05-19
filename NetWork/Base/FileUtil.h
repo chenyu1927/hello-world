@@ -4,12 +4,20 @@
 #include <boost/noncopyable.hpp>
 #include "StringPiece.hpp"
 #include <fcntl.h>
+#include <string.h>
 
 template<typename To, typename From>
 inline To implicit_cast(From const& f)
 {
 	return f;
 }
+
+/*char errbuf[512];  全局变量定义报错---全局变量不能定义在头文件*/
+
+const char* strerror_tl(int savedErrno);
+/*{
+	return ::strerror_r(savedErrno, errbuf, sizeof (errbuf));
+}*/
 
 class ReadSmallFile : boost::noncopyable
 {
@@ -35,7 +43,26 @@ private:
 	char buf_[kBufferSize];
 };
 
+class AppendFile : boost::noncopyable
+{
+public:
+	explicit AppendFile(StringArg filename);
 
+	~AppendFile();
+
+	void append(const char* logline, const size_t len);
+
+	void flush();
+
+	size_t writtenBytes() const { return writtenBytes_; }
+private:
+	
+	size_t write(const char* logline, const size_t len);
+
+	FILE *fp_;
+	char buf_[64*1024];
+	size_t writtenBytes_;
+};
 
 
 

@@ -55,7 +55,6 @@ template <typename T>
 size_t BlockQueue<T>::size()
 {
 	MUTEX_GUARD(obj, mutex_);
-
 	return queue_.size(); // no exception
 }
 

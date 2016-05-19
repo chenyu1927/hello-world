@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <stdio.h>
+
 
 ReadSmallFile::ReadSmallFile(StringArg filename)
 	  : err_(0)
@@ -107,4 +109,61 @@ int ReadSmallFile::readToBuffer(int *size)
 		}
 	}
 	return err;
+}
+
+/* *************************************************************************** */
+char t_errnobuf[512];
+const char* strerror_tl(int savedError)
+{
+	return ::strerror_r(savedError, t_errnobuf, sizeof (t_errnobuf));
+}
+
+/* *************************************************************************** */
+
+AppendFile::AppendFile(StringArg filename)
+	: fp_(::fopen(filename.c_str(), "ae")),
+	  writtenBytes_(0)
+{
+	assert(fp_);
+	::setbuffer(fp_, buf_, sizeof (buf_));
+}
+
+AppendFile::~AppendFile()
+{
+	if (fp_)
+		fclose(fp_);
+}
+
+void AppendFile::append(const char* logline, const size_t len)
+{
+	size_t n = write(logline, len);
+	size_t remain = len - n;
+	while (remain > 0)
+	{
+		size_t x = write(logline + n, remain);
+		if (x == 0)
+		{
+			int err = ferror(fp_);
+			if (err)
+			{
+				fprintf(stderr, "AppendFile::append() failed %s\n", strerror_tl(err));
+			}
+			break;
+		}
+
+		n += x;
+		remain = len - n;
+	}
+
+	writtenBytes_ += len;
+}
+
+size_t AppendFile::write(const char* logline, const size_t len)
+{
+	return ::fwrite_unlocked(logline, 1, len, fp_);
+}
+
+void AppendFile::flush()
+{
+	::fflush(fp_);
 }
