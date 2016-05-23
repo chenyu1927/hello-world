@@ -1,7 +1,10 @@
 #ifndef BASESOCKET_H_H
 #define BASESOCKET_H_H
 
-#include "RefObject.hpp"
+#include "RefObject.h"
+#include <stdint.h>
+#include <arpa/inet.h>
+#include <string>
 
 typedef int SOCKET;
 enum{
@@ -28,7 +31,11 @@ public:
 			const char* server_ip,
 			uint16_t	server_port
 			);
-
+	inline SOCKET GetSocket() {  return m_fd; }
+	inline void SetRemoteIp(const char* str) { remote_ip = str; }
+	inline void SetSocket(SOCKET fd) { m_fd = fd; }
+	inline void SetState(uint16_t state) { m_state = state; }
+	inline void SetRemotePort(uint16_t port) { remote_port = port; }
 public:
 	int Recv(char *buff, int size);
 	int Send(char *buff, int size);
@@ -41,10 +48,10 @@ public:
 
 private:
 
-	void _SetNonblock(SOCKET fd);
-	void _SetResuseAddr(SOCKET fd);
+	void _SetNoblock(SOCKET fd);
+	void _SetReuseAddr(SOCKET fd);
 	void _SetNoDelay(SOCKET fd);
-
+	int  _AcceptNewSocket();
 	void _SetAddr(const char *server_ip, uint16_t server_port, sockaddr_in* pAddr);
 private:
 

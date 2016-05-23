@@ -1,9 +1,15 @@
 #include "BaseSocket.h"
 #include <sys/socket.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
+#include "EventDispatch.h"
+#include <boost/unordered_map.hpp>
+#include <strings.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <netinet/tcp.h>
 
-typedef boost::unorder_map<int, BaseSocket *> EventMap;
+typedef boost::unordered_map<int, BaseSocket *> EventMap;
 EventMap g_event_map;
 
 void AddBaseSocket(BaseSocket *pSock)
@@ -43,7 +49,7 @@ BaseSocket::~BaseSocket()
 		close(m_fd);
 }
 
-void BaseSocket::_SetNonblock(SOCKET fd)
+void BaseSocket::_SetNoblock(SOCKET fd)
 {
 	int flag = fcntl(fd, F_GETFL, 0);
 
@@ -79,7 +85,7 @@ void BaseSocket::_SetAddr(const char *server_ip, uint16_t server_port, sockaddr_
 	inet_pton(AF_INET, server_ip, &pAddr->sin_addr.s_addr);
 	if (pAddr->sin_addr.s_addr == 0)
 	{
-		hosten *hten = gethostbyname(server_ip);
+		hostent *hten = gethostbyname(server_ip);
 		if (hten == NULL)
 		{
 			return ;
@@ -180,7 +186,7 @@ int BaseSocket::_AcceptNewSocket()
 	socklen_t length;
 	int fd;
 	char ip_str[64];
-	while ((fd = accept(m_fd, &cli_addr, &length)) > 0)
+	while ((fd = accept(m_fd, (sockaddr *)&cli_addr, &length)) > 0)
 	{
 		BaseSocket *pSock = new BaseSocket();
 		uint32_t ip = ntohl(cli_addr.sin_addr.s_addr);
@@ -224,7 +230,7 @@ void BaseSocket::OnWrite(void)
 	{
 		int error = 0;
 		socklen_t len = sizeof (error);
-		getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void *)&error, len);
+		getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void *)&error, &len);
 		
 		if (error)
 		{

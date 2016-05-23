@@ -1,9 +1,7 @@
-#ifndef REFOBJECT_H_H
-#define REFOBJECT_H_H
 
-#include "MutexLock.hpp"
+#include "RefObject.h"
 
-class RefObject
+/*class RefObject
 {
 public:
 	RefObject();
@@ -17,7 +15,7 @@ public:
 private:
 	int refCounts_;
 	MutexLock *mutex_;
-};
+};*/
 
 RefObject::RefObject()
 {
@@ -58,4 +56,3 @@ RefObject::~RefObject()
 	mutex_ = 0;
 }
 
-#endif /* REFOBJECT_H_H */

@@ -1,20 +1,22 @@
 #include "EventDispatch.h"
-#include <sys/epollfd.h>
+//#include <sys/epollfd.h>
 #include <sys/epoll.h>
 #include <stdlib.h>
+#include <string.h>
+#include "BaseSocket.h"
 
 EventDispatch::EventDispatch()
 	: running_(false)
 {
 	efd_ = ::epoll_create(1024);
 	// now 1024 is ignored
-	if (efd < 0)
+	if (efd_ < 0)
 	{
 		abort();
 	}
 }
 
-int EventDispatch::AddEvent(socket_t sockfd, uint8_t event)
+int EventDispatch::AddEvent(int sockfd, uint8_t event)
 {
 	epoll_event events;
 	bzero(&events, sizeof (epoll_event));
@@ -38,7 +40,7 @@ int EventDispatch::AddEvent(socket_t sockfd, uint8_t event)
 	return 0;
 }
 
-int EventDispatch::RemoveEvent(socket_t sockfd, uint8_t event)
+int EventDispatch::RemoveEvent(int sockfd, uint8_t event)
 {
 	if (::epoll_ctl(efd_, EPOLL_CTL_DEL, sockfd, NULL) < 0)
 	{
@@ -71,7 +73,8 @@ void EventDispatch::Loop()
 				psock->OnRead();
 			if (events[i].events & EPOLLOUT)
 				psock->OnWrite();
-			
+
+			psock->ReleaseRef();		
 		}
 	}
 

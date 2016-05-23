@@ -1,5 +1,6 @@
 #include "Thread.h"
 #include <boost/static_assert.hpp>
+#include <stdlib.h>
 
 Thread::Thread(const Func& func, const std::string& name)
 	: started_(false),
@@ -32,6 +33,8 @@ void Thread::startFunc()
 	}
 	catch (...)
 	{
+		/*FIXME:log */
+		::abort();
 		//....
 	}
 }

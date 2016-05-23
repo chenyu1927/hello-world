@@ -18,7 +18,7 @@ class Thread : boost::noncopyable
 {
 public:
 	typedef boost::function<void (void)> Func;
-	Thread(const Func& func, const std::string& name=std::string());
+	explicit Thread(const Func& func, const std::string& name=std::string());
 	~Thread();
 
 	static void* runInThread(void *argv);

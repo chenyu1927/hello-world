@@ -2,6 +2,8 @@
 #define EVENT_DISPATCH_H_H
 
 #include <boost/noncopyable.hpp>
+#include "Singleton.hpp"
+#include <stdint.h>
 
 class EventDispatch : boost::noncopyable
 {
@@ -16,8 +18,8 @@ public:
 	~EventDispatch();
 
 public:
-	int AddEvent(socket_t sockfd, uint8_t event);
-	int RemoveEvent(socket_t sockfd, uint8_t event);
+	int AddEvent(int sockfd, uint8_t event);
+	int RemoveEvent(int sockfd, uint8_t event = 0);
 
 	void Loop();
 	void Quit();
@@ -28,14 +30,8 @@ private:
 	int efd_;
 };
 
-
-
-
-
-
-
-
-
+typedef Singleton<EventDispatch> EventDispatchSingle;
+#define EVENTDISPATCH EventDispatchSingle::instance()
 
 
 #endif /* EVENT_DISPATCH_H_H */

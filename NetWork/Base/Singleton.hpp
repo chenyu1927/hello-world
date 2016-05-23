@@ -7,7 +7,7 @@ class Singleton : boost::noncopyable
 {
 public:
 	static T* instance();
-	void destory();
+	void destroy();
 private:
 	Singleton();
 	~Singleton();
@@ -52,5 +52,6 @@ T& instance(void)
 	return obj;
 }
 
-
+template<typename T>
+Singleton<T>* Singleton<T>::instance_ = 0;
 #endif /* SINGLETON_H_H */
