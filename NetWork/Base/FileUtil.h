@@ -3,14 +3,15 @@
 
 #include <boost/noncopyable.hpp>
 #include "StringPiece.hpp"
+#include "type.h"
 #include <fcntl.h>
 #include <string.h>
 
-template<typename To, typename From>
+/*template<typename To, typename From>
 inline To implicit_cast(From const& f)
 {
 	return f;
-}
+}*/
 
 /*char errbuf[512];  全局变量定义报错---全局变量不能定义在头文件*/
 

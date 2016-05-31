@@ -17,7 +17,7 @@ Thread::Thread(const Func& func, const std::string& name)
 void* Thread::runInThread(void *argv)
 {
 	Thread *self = static_cast<Thread *>(argv);
-	assert(!self->func_.empty()); //如果为空，调用会抛出异常
+//	assert(!self->func_.empty()); //如果为空，调用会抛出异常
 	
 	self->startFunc();
 	return self;

@@ -27,6 +27,8 @@ public:
 	void start();
 	int join();
 
+	bool started() { return started_; }
+
 private:
 	bool started_;
 	bool joined_;

@@ -17,6 +17,7 @@ ReadSmallFile::ReadSmallFile(StringArg filename)
 	{
 		//error
 		err_ = errno;
+		abort();
 	}
 
 }
