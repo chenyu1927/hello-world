@@ -12,6 +12,11 @@ public:
 		: addr_(addr)
 	{ }
 
+	InetAddress()
+	{
+		::memset(&addr_, 0, sizeof addr_);
+	}
+
 	sa_family_t family() const { return addr_.sin_family; }
 
 	std::string toIp() const;
