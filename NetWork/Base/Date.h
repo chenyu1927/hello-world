@@ -69,25 +69,15 @@ private:
 };
 
 
+inline bool operator<(const Date& rhs, const Date& lhs)
+{
+	return rhs.julianDayNumber() < lhs.julianDayNumber();
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+inline bool operator==(const Date& rhs, const Date& lhs)
+{
+	return rhs.julianDayNumber() == lhs.julianDayNumber();
+}
 
 
 
