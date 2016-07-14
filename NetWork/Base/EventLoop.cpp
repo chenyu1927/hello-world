@@ -109,3 +109,28 @@ void EventLoop::handleRead()
 		//log error
 	}
 }
+
+void EventLoop::runInLoop(const Functor& cb)
+{
+	if (isInLoopThread())
+	{
+		cb();
+	}
+	else
+	{
+		queueInLoop(cb);
+	}
+}
+
+void EventLoop::queueInLoop(const Functor& cb)
+{
+	{
+		MUTEX_GUARD(obj, mutex_);
+		pendingFunctors_.push_back(cb);
+	}
+
+	if (!isInLoopThread() || callingPendingFunctors_)
+	{
+		wakeup();
+	}
+}

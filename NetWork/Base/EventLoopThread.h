@@ -23,6 +23,7 @@ public:
 	~EventLoopThread();
 
 	EventLoop* startLoop();
+
 private:
 	void threadFunc();
 	
@@ -34,30 +35,5 @@ private:
 
 	ThreadInitCallBack callback_;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif /* EVENT_LOOP_THREAD_H_H */
