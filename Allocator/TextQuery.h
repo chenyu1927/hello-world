@@ -40,11 +40,12 @@ public:
 
 	void printElement()
 	{
-		auto iter = text_map_.begin();
+		/*	auto iter = text_map_.begin();
 		for (; iter != text_map_.end(); ++ iter)
 		{
 			cout << iter->first << endl;
-		}
+		}*/
+		for_each(text_map_.begin(), text_map_.end(), [] (string& s) { cout << s << endl; });
 	}
 	
 	LineNums* lineList(const string& element)

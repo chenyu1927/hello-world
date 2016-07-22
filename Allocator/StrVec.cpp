@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -64,8 +65,9 @@ void StrVec::free()
 {
 	if (element_)
 	{
-		while (free_ != element_)
-			alloc_.destroy(--free_);
+/*		while (free_ != element_)
+			alloc_.destroy(--free_);*/
+		for_each(element_, free_, [] (string& p) -> void  { alloc_.destroy(&p); });
 		alloc_.deallocate(element_, cap_ - element_);
 	}
 }
@@ -89,7 +91,7 @@ void StrVec::free()
 		cap_ = new_element + newCap;
 		element_ = new_element;
 		free_ = new_free;
-	}
+	 }
 }*/
 
 //#ifdef C++11
