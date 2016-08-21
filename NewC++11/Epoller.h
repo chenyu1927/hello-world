@@ -4,9 +4,12 @@
 #include <vector>
 #include <map>
 #include <boost/noncopyable.hpp>
+#include "Timestamp.h"
+#include "EventLoop.h"
 
 class Channel;
-class EventLoop;
+//class EventLoop;
+
 struct epoll_event;
 
 class Epoller : boost::noncopyable
