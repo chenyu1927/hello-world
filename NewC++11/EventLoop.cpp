@@ -2,6 +2,7 @@
 #include <sys/eventfd.h>
 #include "Channel.h"
 #include "Epoller.h"
+#include "TimerQueue.h"
 #include <unistd.h>
 
 namespace
@@ -34,7 +35,7 @@ EventLoop::EventLoop()
 	: looping_(false), quit_(false), 
 	  eventHandling_(false), callingPendingFunctors_(false),
 	  iteration_(0), threadId_(CurrentThread::tid()),
-	  epoller_(new Epoller(this)), wakeupFd_(createEventFd()),
+	  epoller_(new Epoller(this)), timerQueue_(new TimerQueue(this)), wakeupFd_(createEventFd()),
 	  wakeupChannel_(new Channel(this, wakeupFd_)), currentActiveChannel_(nullptr)
 {
 	if (t_loopInThisThread)
@@ -192,4 +193,22 @@ void EventLoop::abortNotInLoopThread()
 {
 	
 }
+
+TimerId EventLoop::runAt(const Timestamp& time, TimerCallback&& cb)
+{
+	assert(looping_ && !quit_);
+	return timerQueue_->addTimer(std::move(cb), time, 0.0);
+}
+
+TimerId EventLoop::runAfter(double delay, TimerCallback&& cb)
+{
+	Timestamp time(addTime(Timestamp::now(), delay));
+	return timerQueue_->addTimer(std::move(cb),time, 0.0);
+}
+
+TimerId EventLoop::runEvery(double interval, TimerCallback&& cb)
+{
+	return timerQueue_->addTimer(std::move(cb), Timestamp::now(), interval);
+}
+
 

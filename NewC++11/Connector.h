@@ -18,8 +18,8 @@ public:
 	Connector(EventLoop* loop, const InetAddress& serveraddr);
 	~Connector();
 
-	void setNewConnectionCallback(NewConnection& cb)
-	{ newConnectionCallback = cb; }
+	void setNewConnectionCallback(NewConnectionCallback& cb)
+	{ newConnectionCallback_ = cb; }
 
 	void start(); 
 	void restart();

@@ -221,7 +221,7 @@ bool sockets::isSelfConnect(int sockfd)
 	else if (localaddr.sin6_family == AF_INET6)
 	{
 		return localaddr.sin6_port == peeraddr.sin6_port
-				&& memcmp(&localaddr.sin6_addr, &peeraddr.sin6_addr, sizeof localaddr.sin6_addr    ) == 0;
+				&& memcmp(&localaddr.sin6_addr, &peeraddr.sin6_addr, sizeof localaddr.sin6_addr) == 0;
 	}
 	else
 	{

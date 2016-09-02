@@ -13,6 +13,8 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& address, bool reusePort)
 	  idleFd_(::open("/dev/null", O_RDONLY | O_CLOEXEC))
 {
 	assert(acceptSocket_.fd() > 0);
+	assert(acceptChannel_.fd() == acceptSocket_.fd());
+
 	if (idleFd_ < 0)
 	{
 		fprintf(stderr, "system open /dev/null error\n");
@@ -51,7 +53,7 @@ void Acceptor::handleRead()
 	assert(listenning_);
 	
 	InetAddress peeraddr;
-	while (true)
+//	while (true) //error cannot use while
 	{
 		int connfd = acceptSocket_.accept(&peeraddr);
 		if (connfd >= 0)
@@ -67,7 +69,13 @@ void Acceptor::handleRead()
 		}
 		else
 		{
-			break;
+			if (errno == EMFILE) // accept socket max
+			{
+				::close(idleFd_);
+				idleFd_ = ::accept(acceptSocket_.fd(), NULL, NULL);
+				::close(idleFd_);
+				idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
+			}
 			//FIXME:has some do the error
 		}
 	}

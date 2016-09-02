@@ -26,6 +26,8 @@ public:
 	{ writeCallback_ = cb; }
 	void setCloseCallback(EventCallback&& cb)
 	{ closeCallback_ = cb; }
+	void setErrorCallback(EventCallback&& cb)
+	{ errorCallback_ = cb; }
 
 	void tie(const std::shared_ptr<void>&);
 	int fd() const { return fd_; }

@@ -1,3 +1,9 @@
+TimerQueue.out :  TimerQueue_test.cpp TimerQueue.cpp Timer.cpp EventLoop.cpp Timestamp.cpp Epoller.cpp Channel.cpp Thread.cpp
+	g++ -oTimerQueue.out TimerQueue_test.cpp TimerQueue.cpp Timer.cpp EventLoop.cpp Timestamp.cpp Epoller.cpp Channel.cpp Thread.cpp -std=c++11	-lboost_system -lpthread -g
+
+Connector.out : Connector_test.cpp Connector.cpp SocketOps.cpp InetAddress.cpp EventLoop.cpp Channel.cpp Epoller.cpp Timestamp.cpp Thread.cpp
+	g++ -oConnector.out Connector_test.cpp Connector.cpp SocketOps.cpp InetAddress.cpp EventLoop.cpp Channel.cpp Epoller.cpp  Timestamp.cpp Thread.cpp -std=c++11 -lboost_system -lpthread -g
+
 Acceptor.out : Acceptor_test.cpp Acceptor.cpp Socket.cpp SocketOps.cpp InetAddress.cpp Socket_test.cpp EventLoop.cpp EventLoopThread.cpp Timestamp.cpp Channel.cpp 
 	g++ -oAcceptor.out Acceptor_test.cpp Acceptor.cpp Socket.cpp SocketOps.cpp InetAddress.cpp EventLoop.cpp Channel.cpp EventLoopThread.cpp Timestamp.cpp	Epoller.cpp Thread.cpp -std=c++11 -lpthread -lboost_system 
 Socket.out : Socket.cpp SocketOps.cpp InetAddress.cpp Socket_test.cpp EventLoop.cpp EventLoopThread.cpp Timestamp.cpp

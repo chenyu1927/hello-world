@@ -6,16 +6,19 @@
 #include "MutexLock.h"
 #include "Timestamp.h"
 #include <functional>
+#include "TimerId.h"
 //#include "Channel.h"
 //#include "Epoller.h"
 
 class Channel;
 class Epoller;
+class TimerQueue;
 
 class EventLoop : boost::noncopyable
 {
 public:
 	typedef std::function<void()> Functor;
+	typedef std::function<void()> TimerCallback;
 
 	EventLoop();
 	~EventLoop();
@@ -23,6 +26,10 @@ public:
 	void loop();
 
 	void quit();
+
+	TimerId runAt(const Timestamp& time, TimerCallback&& cb);
+	TimerId runAfter(double relay, TimerCallback&& cb);
+	TimerId runEvery(double interval, TimerCallback&& cb);
 
 	Timestamp pollReturnTime() const { return pollReturnTime_; }
 	int64_t iteration() const { return iteration_; }
@@ -66,6 +73,7 @@ private:
 	Timestamp pollReturnTime_;
 
 	std::unique_ptr<Epoller> epoller_;
+	std::unique_ptr<TimerQueue> timerQueue_;
 
 	int wakeupFd_;
 	std::unique_ptr<Channel> wakeupChannel_;
@@ -75,7 +83,6 @@ private:
 
 	MutexLock mutex_;
 	std::vector<Functor> pendingFunctors_;
-	
 };
 
 

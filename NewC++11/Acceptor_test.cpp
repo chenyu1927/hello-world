@@ -13,15 +13,18 @@ int main()
 	accept->listen();
 	loop.loop();*/
 
-	EventLoopThread thread([](EventLoop* loop) {
+/*	EventLoopThread thread([](EventLoop* loop) {
 								InetAddress localaddr("127.0.0.1", 8888);
 								Acceptor accept(loop, localaddr); //这个对象是临时的
 								accept.listen();
 			}, "Acceptor");
 
-	EventLoop* acceptLoop = thread.startLoop();
+	EventLoop* acceptLoop = thread.startLoop();*/
 	
 	EventLoop baseLoop;
+	InetAddress localaddr("127.0.0.1", 8888);
+	Acceptor accept(&baseLoop, localaddr);
+	accept.listen();
 	baseLoop.loop();
 
 /*	EventLoop baseLoop;
