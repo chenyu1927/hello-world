@@ -191,7 +191,8 @@ bool EventLoop::hasChannel(Channel* channel)
 
 void EventLoop::abortNotInLoopThread()
 {
-	
+	fprintf(stderr, "not in loop thread\n");
+	abort();
 }
 
 TimerId EventLoop::runAt(const Timestamp& time, TimerCallback&& cb)

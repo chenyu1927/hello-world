@@ -7,11 +7,12 @@
 #include <string>
 #include <atomic>
 #include <map>
+#include "Type.h"
 
 class EventLoop;
 class Acceptor;
 class EventLoopThreadPool;
-
+class InetAddress;
 
 class TcpServer : boost::noncopyable
 {
@@ -55,10 +56,10 @@ public:
 
 private:
 	void newConnection(int sockfd, const InetAddress& peerAddr);
-	void removeConnection(const TcpConnection& conn);
-	void removeConnectionInLoop(const TcpConnection& conn);
+	void removeConnection(const TcpConnectionPtr& conn);
+	void removeConnectionInLoop(const TcpConnectionPtr& conn);
 
-	typedef std::map<std::string, TcpConnection> ConnectionMap;
+	typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
 	EventLoop* loop_;
 //	InetAddress addr_;
 	std::string ipPort_;
@@ -71,34 +72,11 @@ private:
 	WriteCompleteCallback writeCompleteCallback_;
 	ThreadInitCallback threadInitCallback_;
 	
-	std::atomic_flag started_;
+	std::atomic<bool> started_;
 
 	int nextConnId_;
 	ConnectionMap connections_;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

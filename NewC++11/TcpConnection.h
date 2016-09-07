@@ -3,9 +3,11 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/any.hpp>
+#include <atomic>
 #include "Buffer.h"
 #include "InetAddress.h"
-#include <memory>
+//#include <memory>
+#include "Type.h"
 
 class EventLoop;
 class Socket;
@@ -16,7 +18,7 @@ class TcpConnection : boost::noncopyable,
 					  public std::enable_shared_from_this<TcpConnection>
 {
 public:
-	TcpConnection(EventLoop* loop, const std::string& name
+	TcpConnection(EventLoop* loop, const std::string& name,
 			int sockfd, const InetAddress& localAddr, const InetAddress& peerAddr);
 	~TcpConnection();
 
@@ -33,11 +35,12 @@ public:
 	void send(const void* message, int len);
 	void send(const StringPiece& message);
 	void send(Buffer* message);
-	void send(Buffer&& message);
+	void send(Buffer& message);
 
 	void shutdown();
 
 	void forceClose();
+	void forceCloseInLoop();
 	void forceCloseWithDelay(double seconds);
 	void setTcpNoDelay(bool on);
 
@@ -57,20 +60,22 @@ public:
 	Buffer* inputBuffer() { return &inputBuffer_; }
 	Buffer* outputBuffer() { return &outputBuffer_; }
 
-	void setCloseCallback(const CloseCallbakc& cb) { closeCallback_ = cb; }
+	void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; }
 
 	void connectEstablished();
 	void connectDestroyed();
 
 
 private:
-	enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting, }
+	enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting, };
+	void setState(StateE state) { state_ = state; }
 	
 	void handleRead(Timestamp receviceTime);
 	void handleWrite();
 	void handleClose();
 	void handleError();
 
+	void sendInLoop(std::string&& message);
 	void sendInLoop(const StringPiece& message);
 	void sendInLoop(const void* message, int len);
 	void shutdownInLoop();
@@ -80,7 +85,7 @@ private:
 
 	EventLoop* loop_;
 	const std::string name_;
-	StateE state_;
+	std::atomic<StateE> state_;
 
 	std::unique_ptr<Socket> socket_;
 	std::unique_ptr<Channel> channel_;
@@ -100,11 +105,6 @@ private:
 	boost::any context_; //std c++17
 	bool reading_;
 };
-
-
-
-
-
 
 
 

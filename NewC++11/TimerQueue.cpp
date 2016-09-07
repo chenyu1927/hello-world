@@ -142,7 +142,7 @@ bool TimerQueue::insert(Timer* timer)
 
 	Timestamp when = timer->expiration();
 	auto iter = timers_.begin();
-	if (iter == timers_.end() || when < iter->second->expiration())
+	if (iter == timers_.end() || when < iter->first)
 	{
 		earliestChanged = true;
 	}
@@ -158,6 +158,7 @@ bool TimerQueue::insert(Timer* timer)
 	}
 
 	assert(timers_.size() == activeTimers_.size());
+	return earliestChanged;
 }	
 
 

@@ -16,7 +16,7 @@ public:
 	explicit Acceptor(EventLoop* loop, const InetAddress& listenaddr, bool reusePort = false);
 	~Acceptor();
 
-	void setNewConnectionCallback(const NewConnectionCallback& cb)
+	void setNewConnectionCallback(NewConnectionCallback&& cb)
 	{ newConnectionCallback_ = cb; }
 
 	bool listenning() const { return listenning_; }

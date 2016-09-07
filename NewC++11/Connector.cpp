@@ -6,6 +6,8 @@
 #include <assert.h>
 #include "SocketOps.h"
 
+const int Connector::kMaxRetryDelayMs;
+
 Connector::Connector(EventLoop* loop, const InetAddress& serveraddr)
 	: loop_(loop), serveraddr_(serveraddr), connect_(false), 
 	  state_(kDisconnected), retryDelayMs_(kInitRetryDelayMs)
@@ -142,7 +144,8 @@ void Connector::handleWrite()
 			setState(kConnected);
 			if (connect_)
 			{
-				newConnectionCallback_(sockfd);
+				if (newConnectionCallback_)
+					newConnectionCallback_(sockfd);
 			}
 			else
 			{
@@ -167,7 +170,10 @@ void Connector::handleError()
 void Connector::restart()
 {
 	loop_->assertInLoopThread();
-
+	setState(kDisconnected);
+	retryDelayMs_ = kInitRetryDelayMs;
+	connect_ = true;
+	startInLoop();
 }
 
 void Connector::retry(int sockfd)
@@ -176,10 +182,11 @@ void Connector::retry(int sockfd)
 	setState(kDisconnected);
 	if (connect_)
 	{
-		
+		loop_->runAfter(retryDelayMs_ / 1000.0, std::bind(&Connector::startInLoop, shared_from_this()));
+		retryDelayMs_ = std::min(retryDelayMs_ * 2, kMaxRetryDelayMs);
 	}
 	else
 	{
-
+		fprintf(stderr, "retry not have connect_\n");
 	}
 }

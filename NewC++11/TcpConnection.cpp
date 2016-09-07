@@ -2,29 +2,43 @@
 #include "EventLoop.h"
 #include "Socket.h"
 #include "Channel.h"
+#include "StringPiece.h"
 #include "SocketOps.h"
+
+void defaultConnectionCallback(const TcpConnectionPtr& conn)
+{
+	
+}
+
+void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp receiveTime)
+{
+	fprintf(stdout, "%s \n", buffer->retrieveAllAsString().c_str());
+}
+
 
 using namespace std::placeholders; // bind -> _1
 
-TcpConnection::TcpConnection(EventLoop* loop, const std::string& name, int sockfd
+TcpConnection::TcpConnection(EventLoop* loop, const std::string& name, int sockfd,
 		const InetAddress& localAddr, const InetAddress& peerAddr)
-	: loop_(loop), state_(kDisconnected), socket_(new Socket(sockfd)),
+	: loop_(loop), name_(name), state_(kConnecting), socket_(new Socket(sockfd)),
 	  channel_(new Channel(loop_, sockfd)), localAddr_(localAddr), peerAddr_(peerAddr), 
 	  highWaterMark_(64*1024*1024), reading_(true)
 {
-	assert(sockfd >= 0);
-	assert(socket_.fd() == channel_.fd());
+//	std::atomic_init(&state_, kDisconnected);
 
-	channel_.setReadCallback(std::bind(&TcpConnection::handleRead, this, _1));
-	channel_.setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
-	channel_.setCloseCallback(std::bind(&TcpConnection::handleClose, this));
-	channel_.setErrorCallback(std::bind(&TcpConnection::handleError, this));
+	assert(sockfd >= 0);
+	assert(socket_->fd() == channel_->fd());
+
+	channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this, _1));
+	channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
+	channel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
+	channel_->setErrorCallback(std::bind(&TcpConnection::handleError, this));
 }
 
 TcpConnection::~TcpConnection()
 {
 //	loop_->assertInLoopThread();
-	assert(state_ == kDisconnected);
+	assert(state_ == kDisconnected); //operator T()
 }
 
 void TcpConnection::send(const void* message, int len)
@@ -36,15 +50,17 @@ void TcpConnection::send(const StringPiece& message)
 {
 	if (state_ == kConnected)
 	{
-		if (loop_->assertInLoopThread())
+		if (loop_->isInLoopThread())
 		{
 			sendInLoop(message);
 		}
 		else
 		{
-			loop_->runInLoop(
+		/*	loop_->runInLoop(
 					std::bind(&TcpConnection::sendInLoop, this, 
-						std::forward<std::string>(message.to_string())));
+						//std::forward<std::string>(message)));
+						message));*/
+			loop_->runInLoop([&]() { this->sendInLoop(message); });
 		}
 	}
 }
@@ -53,34 +69,41 @@ void TcpConnection::send(Buffer* buffer)
 {
 	if (state_ == kConnected)
 	{
-		if (loop_->assertInLoopThread())
+		if (loop_->isInLoopThread())
 		{
 			sendInLoop(buffer->peek(), buffer->readableBytes());
 			buffer->retrieveAll();
 		}
 		else
 		{
-			loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this,
-						buffer->retrieveAllAsString()));
+			/*loop_->runInLoop(std::bind(static_cast<void(*)(std::string&&)>(&TcpConnection::sendInLoop), this,
+						std::move(buffer->retrieveAllAsString())));*/
+			loop_->runInLoop([&]() { this->sendInLoop(std::move(buffer->retrieveAllAsString())); });
 		}
 	}
 }
 
-void TcpConnection::send(Buffer&& buf)
+void TcpConnection::send(Buffer& buf)
 {
-	if (sate_ == kConnected)
+	if (state_ == kConnected)
 	{
-		if (loop_->assertInLoopThread())
+		if (loop_->isInLoopThread())
 		{
 			sendInLoop(buf.peek(), buf.readableBytes());
 			buf.retrieveAll();
 		}
 		else
 		{
-			loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, 
-						buf.retrieveAllAsString()));
+			/*loop_->runInLoop(std::bind(static_cast<void(*)(std::string&&)>(&TcpConnection::sendInLoop), this, 
+						std::move(buf.retrieveAllAsString())));*/ //can not complite
+			loop_->runInLoop([&]() { this->sendInLoop(std::move(buf.retrieveAllAsString())); });
 		}
 	}
+}
+
+void TcpConnection::sendInLoop(std::string&& message)
+{
+	sendInLoop(static_cast<const void*>(message.c_str()), message.size());
 }
 
 void TcpConnection::sendInLoop(const StringPiece& message)
@@ -104,7 +127,7 @@ void TcpConnection::sendInLoop(const void* message, int len)
 
 	if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0)
 	{
-		nWrote = sockets::write(socket_.fd(), message, len);
+		nWrote = sockets::write(socket_->fd(), message, len);
 		if (nWrote >= 0)
 		{
 			remaining = len - nWrote;
@@ -212,7 +235,7 @@ void TcpConnection::forceCloseWithDelay(double second)
 {
 	if (state_ == kConnected || state_ == kDisconnecting)
 	{
-
+		loop_->runAfter(second, std::bind(&TcpConnection::forceCloseInLoop, shared_from_this()));
 	}
 }
 
@@ -226,7 +249,7 @@ void TcpConnection::handleRead(Timestamp receviceTime)
 {
 	loop_->assertInLoopThread();
 	int saveErrno = 0;
-	ssize_t n = inputBuffer_.readFd(channel_.fd(), &saveErrno);
+	ssize_t n = inputBuffer_.readFd(channel_->fd(), &saveErrno);
 	if (n > 0)
 	{
 		messageCallback_(shared_from_this(), &inputBuffer_, receviceTime);
@@ -243,5 +266,87 @@ void TcpConnection::handleRead(Timestamp receviceTime)
 
 void TcpConnection::handleClose()
 {
+	loop_->assertInLoopThread();
+
+	assert(state_ == kConnected || state_ == kDisconnecting);
+
+	setState(kDisconnected);
+	channel_->disableAll();
+
+	TcpConnectionPtr guardThis(shared_from_this());
+	connectionCallback_(guardThis);
+
+
+	closeCallback_(guardThis);
 
 }
+
+void TcpConnection::handleError()
+{
+	loop_->assertInLoopThread();
+
+	int err = sockets::getSockError(socket_->fd());
+
+	fprintf(stderr, "TcpConnection handle error %d \n", err);
+	abort();
+}
+
+void TcpConnection::handleWrite()
+{
+	loop_->assertInLoopThread();
+	
+	if (channel_->isWriting())
+	{
+		ssize_t n = sockets::write(channel_->fd(), outputBuffer_.peek(), outputBuffer_.readableBytes());
+		if (n > 0)
+		{
+			outputBuffer_.retrieve(n);
+			if (outputBuffer_.readableBytes() == 0)
+			{
+				channel_->disableWriting();
+				if (writeCompleteCallback_)
+					loop_->runInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+			}
+
+			if (state_ == kDisconnecting)
+			{
+				shutdownInLoop();
+			}
+		}
+		else
+		{
+			fprintf(stderr, "TcpConnection write error\n");
+			abort();
+		}
+	}
+	else
+	{
+
+	}
+}
+
+void TcpConnection::connectEstablished()
+{
+	loop_->assertInLoopThread();
+	assert(state_ == kConnecting);
+	setState(kConnected);
+	channel_->tie(shared_from_this());
+	channel_->enableReading();
+
+	connectionCallback_(shared_from_this());
+}
+
+void TcpConnection::connectDestroyed()
+{
+	loop_->assertInLoopThread();
+	if (state_ == kConnected)
+	{
+		setState(kDisconnected);
+		channel_->disableAll();
+
+		connectionCallback_(shared_from_this());
+	}
+
+	channel_->remove();
+}
+

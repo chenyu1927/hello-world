@@ -51,7 +51,7 @@ Timestamp Epoller::poll(int timeoutMs, ChannelVec* channels)
 	else if (n == 0)
 	{
 		// nothing happen
-		fprintf(stderr, "nothing happen !");
+//		fprintf(stderr, "nothing happen !");
 	}
 	else
 	{
@@ -84,8 +84,8 @@ void Epoller::fillActiveChannels(int numEvents, ChannelVec* activeChannels) cons
 
 bool Epoller::hasChannel(Channel* channel) const
 {
-	auto iter = channel_map_.find(channel->fd());
-	return iter != channel_map_.end();
+	const auto iter = channel_map_.find(channel->fd());
+	return iter != channel_map_.end() && iter->second == channel;
 }
 
 void Epoller::updateChannel(Channel* channel)
@@ -135,8 +135,8 @@ void Epoller::removeChannel(Channel* channel)
 
 	int index = channel->index();
 	assert(index == kAdded || index == kDeleted);
-	channel_map_.erase(fd);
-
+	size_t n = channel_map_.erase(fd);
+	assert(n == 1);
 	if (index == kAdded)
 	{
 		update(EPOLL_CTL_DEL, channel);

@@ -43,6 +43,10 @@ public:
 		  length_(static_cast<int>(strlen(ptr_)))
 	{}
 
+	StringPiece(const char* offset, int len)
+		: ptr_(offset), length_(len)
+	{}
+
 	const char* ptr() const { return ptr_; }
 	int size() const { return length_; }
 	bool empty() const { return length_ == 0; }

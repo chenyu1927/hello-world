@@ -23,6 +23,7 @@ Channel::~Channel()
 	assert(!addedToLoop_);
 	if (loop_->isInLoopThread())
 	{
+		fprintf(stderr, "channel destroy fd = %d\n", fd());
 		assert(!loop_->hasChannel(this)); // has remove from this loop
 	}
 }
