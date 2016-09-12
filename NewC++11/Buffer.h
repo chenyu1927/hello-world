@@ -7,6 +7,7 @@
 #include <string>
 #include <string.h>
 #include "Endian.h"
+#include "StringPiece.h"
 //#include <stdint.h>
 
 class Buffer
@@ -127,10 +128,15 @@ public:
 		return result;
 	}
 	
-/*	StringPiece toStringPiece() const
+	StringPiece toStringPiece() const
 	{
 		return StringPiece(peek(), static_cast<int>(readableBytes()));
-	}*/
+	}
+
+	void append(const StringPiece& data)
+	{
+		append(data.ptr(), data.size());
+	}
 
 	void append(const char* data, size_t length)
 	{

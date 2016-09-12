@@ -1,4 +1,7 @@
 
+HttpServer.out : HttpServer_test.cpp HttpServer.cpp HttpRespond.cpp HttpContent.cpp TcpServer.cpp TcpConnection.cpp Buffer.cpp Timestamp.cpp Acceptor.cpp Socket.cpp SocketOps.cpp InetAddress.cpp EventLoopThreadPool.cpp EventLoopThread.cpp EventLoop.cpp TimerQueue.cpp Timer.cpp Epoller.cpp Channel.cpp Thread.cpp
+	g++ -oHttpServer.out	 HttpServer_test.cpp HttpServer.cpp HttpRespond.cpp HttpContent.cpp TcpServer.cpp TcpConnection.cpp Buffer.cpp Timestamp.cpp Acceptor.cpp Socket.cpp SocketOps.cpp InetAddress.cpp EventLoopThreadPool.cpp EventLoopThread.cpp EventLoop.cpp TimerQueue.cpp Timer.cpp Epoller.cpp Channel.cpp Thread.cpp -std=c++11 -lpthread -lboost_system -g
+
 TcpClient.out : TcpClient_test.cpp TcpClient.cpp TcpConnection.cpp Buffer.cpp Timestamp.cpp Connector.cpp Socket.cpp Epoller.cpp SocketOps.cpp InetAddress.cpp EventLoop.cpp TimerQueue.cpp Timer.cpp Channel.cpp Thread.cpp
 	g++ -oTcpClient.out TcpClient_test.cpp TcpClient.cpp TcpConnection.cpp Buffer.cpp Timestamp.cpp Connector.cpp Epoller.cpp Socket.cpp SocketOps.cpp InetAddress.cpp EventLoop.cpp TimerQueue.cpp Timer.cpp Channel.cpp Thread.cpp -std=c++11 -lpthread -lboost_system -g
 

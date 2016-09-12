@@ -3,6 +3,8 @@
 #include "Type.h"
 #include <sys/uio.h>
 
+const char Buffer::kCRLF[] = "\r\n";
+
 ssize_t Buffer::readFd(const int fd, int* saveErrno)
 {
 	char extrabuf[65536];
