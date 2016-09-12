@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 using namespace std;
 
@@ -140,6 +141,14 @@ StrVec::~StrVec()
 {
 	free();
 }
+///////////////////////////////////////////////////////////////////////////
+
+bool chk_size(const string& s, string::size_type sz)
+{
+	return s.size() >= sz;
+}
+
+using std::placeholders::_1;
 
 int main(void)
 {
@@ -150,6 +159,10 @@ int main(void)
 
 	str_vec.push_back(str1);
 	str_vec.push_back(str2);
+	str1 = "what is your name";
+	str_vec.push_back(str1);
+	str1 = "player";
+	str_vec.push_back(str1);
 
 	for(string* x = str_vec.begin(); x != str_vec.end(); ++ x)
 	{
@@ -158,9 +171,16 @@ int main(void)
 	
 	StrVec str_vec2 = str_vec;
 
-	for(string* x = str_vec2.begin(); x != str_vec2.end(); ++ x)
+	stable_sort(str_vec2.begin(), str_vec2.end(), [] (const string& lh, const string& rh) { return lh.size() < rh.size(); });
+
+	string* pos = find_if(str_vec2.begin(), str_vec2.end(), bind(chk_size, _1, 15));
+
+/*	for(string* x = str_vec2.begin(); x != str_vec2.end(); ++ x)
 	{
 		cout << *x << endl;
-	}
+	}*/
+	for_each(str_vec2.begin(), str_vec2.end(), [] (const string& s) -> void { cout << s << endl;});
+
+	cout << *pos << endl;
 	return 0;
 }

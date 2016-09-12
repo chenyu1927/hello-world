@@ -6,9 +6,6 @@ void* last_valid_address;
 
 void self_malloc_init()
 {
-	if (has_init)
-		return ;
-
 	managed_mem_start = last_valid_address = sbrk(0);
 	has_init = 1;
 }

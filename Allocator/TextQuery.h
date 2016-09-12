@@ -13,6 +13,8 @@
 
 using namespace std;
 
+class QueryResult;
+
 class TextQuery
 {
 public:
@@ -22,6 +24,11 @@ public:
 	TextQuery(const string& filepath)
 	{
 		loadFile(filepath);
+	}
+
+	TextQuery(std::ifstream& in)
+	{
+		
 	}
 
 	~TextQuery()
@@ -59,7 +66,8 @@ public:
 
 	vector<string>& text()
 	{ return lines_; }
-
+	
+	QueryResult runSearch(ifstream& in);
 private:
 
 	vector<string> lines_;
@@ -119,19 +127,19 @@ void TextQuery::loadFile(const string& filepath)
 class QueryResult
 {
 public:
-	QueryResult(const string& file)
-		: cursor_(new TextQuery(file))
-	{
+	QueryResult()
+	{}
 
-	}
-
-	void runSearch(istream& in);
+//	void runSearch(istream& in);
 
 private:
-	shared_ptr<TextQuery> cursor_;
+	string element_;
+	TextQuery::LineNums lines_;
+	
+//	shared_ptr<TextQuery> cursor_;
 };
 
-void QueryResult::runSearch(istream& in)
+/*void QueryResult::runSearch(istream& in)
 {
 	string element;
 	in >> element;
@@ -144,7 +152,7 @@ void QueryResult::runSearch(istream& in)
 			cout << *iter << ' ' << cursor_->text()[*iter - 1] << endl;
 		}
 	}
-}
+}*/
 
 
 

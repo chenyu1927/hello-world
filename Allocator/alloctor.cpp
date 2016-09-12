@@ -1,4 +1,4 @@
-
+/* 云风 smallobject */
 class smallobject_allocator{
 public:
 	enum{
