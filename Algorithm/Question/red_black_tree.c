@@ -8,15 +8,18 @@ struct Node
 	struct Node *rchild;
 	struct Node *parent;
 };
-typedef struct Node * node_t;
+
+typedef struct Node * pNode;
 
 struct RBTree
 {
-	struct Node *root;
+	pNode root;
 	int size;
 };
 
 void insert(RBTree *tree, int x);
+int remove(RBTree *tree, int );
+
 
 
 
